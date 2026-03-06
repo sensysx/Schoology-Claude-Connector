@@ -33,8 +33,14 @@ export class SchoologyClient {
     const signingKey = `${encodeURIComponent(this.consumerSecret)}&`;
     const signature = crypto.createHmac('sha1', signingKey).update(baseString).digest('base64');
 
+    console.log('[OAuth] url:', url);
+    console.log('[OAuth] timestamp:', timestamp);
+    console.log('[OAuth] nonce:', nonce);
+    console.log('[OAuth] baseString:', baseString);
+    console.log('[OAuth] signature:', signature);
+
     const headerParams = { ...params, oauth_signature: signature };
-    const authHeader = 'OAuth ' + Object.entries(headerParams)
+    const authHeader = 'OAuth realm="Schoology API", ' + Object.entries(headerParams)
       .map(([k, v]) => `${k}="${encodeURIComponent(v)}"`)
       .join(', ');
 

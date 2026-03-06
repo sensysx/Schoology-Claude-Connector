@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import OAuth from 'oauth-1.0a';
 import fetch from 'node-fetch';
 
 const BASE_URL = 'https://api.schoology.com/v1';
@@ -9,24 +8,46 @@ export class SchoologyClient {
     if (!consumerKey || !consumerSecret) {
       throw new Error('SCHOOLOGY_CONSUMER_KEY and SCHOOLOGY_CONSUMER_SECRET must be set in .env');
     }
-    this.oauth = new OAuth({
-      consumer: { key: consumerKey, secret: consumerSecret },
-      signature_method: 'HMAC-SHA1',
-      hash_function(base_string, key) {
-        return crypto.createHmac('sha1', key).update(base_string).digest('base64');
-      },
-    });
-    this.oauth.getNonce = () => crypto.randomBytes(16).toString('hex');
+    this.consumerKey = consumerKey;
+    this.consumerSecret = consumerSecret;
+  }
+
+  buildAuthHeader(url) {
+    const nonce = crypto.randomBytes(16).toString('hex');
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+
+    const params = {
+      oauth_consumer_key: this.consumerKey,
+      oauth_nonce: nonce,
+      oauth_signature_method: 'HMAC-SHA1',
+      oauth_timestamp: timestamp,
+      oauth_version: '1.0',
+    };
+
+    const paramString = Object.keys(params)
+      .sort()
+      .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
+      .join('&');
+
+    const baseString = `GET&${encodeURIComponent(url)}&${encodeURIComponent(paramString)}`;
+    const signingKey = `${encodeURIComponent(this.consumerSecret)}&`;
+    const signature = crypto.createHmac('sha1', signingKey).update(baseString).digest('base64');
+
+    const headerParams = { ...params, oauth_signature: signature };
+    const authHeader = 'OAuth ' + Object.entries(headerParams)
+      .map(([k, v]) => `${k}="${encodeURIComponent(v)}"`)
+      .join(', ');
+
+    return authHeader;
   }
 
   async request(path) {
     const url = `${BASE_URL}${path}`;
-    const authHeader = this.oauth.toHeader(this.oauth.authorize({ url, method: 'GET' }));
 
     const res = await fetch(url, {
       headers: {
-        ...authHeader,
-        'Accept': 'application/json',
+        Authorization: this.buildAuthHeader(url),
+        Accept: 'application/json',
       },
     });
 
@@ -74,9 +95,9 @@ export class SchoologyClient {
     const now = Date.now() / 1000;
     return all.map((course) => ({
       ...course,
-      assignments: course.assignments.filter(
-        (a) => a.due && parseInt(a.due) >= now
-      ).sort((a, b) => parseInt(a.due) - parseInt(b.due)),
-    })).filter((c) => c.assignments.length > 0);
+      assignments: course.assignments
+        .filter(a => a.due && parseInt(a.due) >= now)
+        .sort((a, b) => parseInt(a.due) - parseInt(b.due)),
+    })).filter(c => c.assignments.length > 0);
   }
 }

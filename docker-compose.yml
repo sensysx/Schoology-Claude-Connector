@@ -1,0 +1,11 @@
+services:
+  schoology-connector:
+    build: .
+    container_name: schoology-connector
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    environment:
+      - SCHOOLOGY_CONSUMER_KEY=${SCHOOLOGY_CONSUMER_KEY}
+      - SCHOOLOGY_CONSUMER_SECRET=${SCHOOLOGY_CONSUMER_SECRET}
+      - PORT=${PORT:-3000}

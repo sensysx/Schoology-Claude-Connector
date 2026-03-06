@@ -106,6 +106,15 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'schoology-connector' });
 });
 
+app.get('/debug', async (_req, res) => {
+  try {
+    const me = await client.getMe();
+    res.json({ status: 'ok', user: me });
+  } catch (e) {
+    res.status(500).json({ status: 'error', message: e.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Schoology MCP server running on port ${PORT}`);
   console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);

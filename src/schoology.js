@@ -16,6 +16,7 @@ export class SchoologyClient {
         return crypto.createHmac('sha1', key).update(base_string).digest('base64');
       },
     });
+    this.oauth.getNonce = () => crypto.randomBytes(16).toString('hex');
   }
 
   async request(path) {

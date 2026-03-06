@@ -76,12 +76,30 @@ function createServer() {
 const app = express();
 app.use(express.json());
 
+// Log every incoming request so we can debug
+app.use((req, _res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
 app.post('/mcp', async (req, res) => {
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
   const server = createServer();
   await server.connect(transport);
   await transport.handleRequest(req, res, req.body);
   res.on('close', () => server.close());
+});
+
+app.get('/mcp', async (req, res) => {
+  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+  const server = createServer();
+  await server.connect(transport);
+  await transport.handleRequest(req, res);
+  res.on('close', () => server.close());
+});
+
+app.delete('/mcp', async (req, res) => {
+  res.status(200).end();
 });
 
 app.get('/health', (_req, res) => {

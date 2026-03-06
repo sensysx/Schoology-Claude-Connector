@@ -4,38 +4,39 @@ An MCP (Model Context Protocol) server that connects Claude to your Schoology ac
 
 Runs as an HTTP server — host it on your home server and connect to it from Claude Desktop or claude.ai.
 
-## Setup on your home server
+## Setup with Portainer
 
-### 1. Clone the repo
+No files need to be copied to your server — Portainer pulls directly from GitHub and you enter your secrets in the UI.
 
-```bash
-git clone https://github.com/your-username/Schoology-Claude-Connector
-cd Schoology-Claude-Connector
-```
+### 1. Create a new Stack
 
-### 2. Configure credentials
+1. Open Portainer and go to **Stacks → Add stack**
+2. Give it a name (e.g. `schoology-connector`)
+3. Select **Repository** as the build method
+4. Set the repository URL to your GitHub repo URL
+5. Set the compose path to `docker-compose.yml`
 
-```bash
-cp .env.example .env
-```
+### 2. Add environment variables
 
-Edit `.env` with your Schoology API credentials:
-- Go to **Schoology > Settings > API Access**
-- Copy your **Consumer Key** and **Consumer Secret**
+Scroll down to the **Environment variables** section and add:
 
-### 3. Run with Docker Compose
+| Variable | Value |
+|----------|-------|
+| `SCHOOLOGY_CONSUMER_KEY` | your key from Schoology |
+| `SCHOOLOGY_CONSUMER_SECRET` | your secret from Schoology |
+| `PORT` | `3000` (or any port you want) |
 
-```bash
-docker compose up -d
-```
+To get your credentials: **Schoology > Settings > API Access**
 
-That's it. Portainer will show it as a running container. The server listens on port `3000`.
+### 3. Deploy
+
+Click **Deploy the stack**. Portainer will pull the repo, build the image, and start the container.
 
 ### 4. Expose it with a public URL
 
-If you already use a reverse proxy (Nginx Proxy Manager, Traefik, etc.) just point a subdomain at port `3000` on the container.
+If you already use a reverse proxy (Nginx Proxy Manager, Traefik, etc.) point a subdomain at the port you chose.
 
-Otherwise the easiest option is **Cloudflare Tunnel** (free):
+Otherwise the easiest option is **Cloudflare Tunnel** (free, no port forwarding needed):
 
 ```bash
 cloudflared tunnel --url http://localhost:3000

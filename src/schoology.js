@@ -1,15 +1,15 @@
 import crypto from 'crypto';
 import fetch from 'node-fetch';
 
-const BASE_URL = 'https://api.schoology.com/v1';
+const BASE_URL = process.env.SCHOOLOGY_BASE_URL || 'https://api.schoology.com/v1';
 
 export class SchoologyClient {
   constructor(consumerKey, consumerSecret) {
     if (!consumerKey || !consumerSecret) {
       throw new Error('SCHOOLOGY_CONSUMER_KEY and SCHOOLOGY_CONSUMER_SECRET must be set in .env');
     }
-    this.consumerKey = consumerKey;
-    this.consumerSecret = consumerSecret;
+    this.consumerKey = consumerKey.trim();
+    this.consumerSecret = consumerSecret.trim();
   }
 
   buildAuthHeader(url) {
@@ -33,16 +33,16 @@ export class SchoologyClient {
     const signingKey = `${encodeURIComponent(this.consumerSecret)}&`;
     const signature = crypto.createHmac('sha1', signingKey).update(baseString).digest('base64');
 
+    const headerParams = { ...params, oauth_signature: signature };
+    const authHeader = 'OAuth ' + Object.entries(headerParams)
+      .map(([k, v]) => `${k}="${v}"`)
+      .join(', ');
+
     console.log('[OAuth] url:', url);
     console.log('[OAuth] timestamp:', timestamp);
     console.log('[OAuth] nonce:', nonce);
-    console.log('[OAuth] baseString:', baseString);
     console.log('[OAuth] signature:', signature);
-
-    const headerParams = { ...params, oauth_signature: signature };
-    const authHeader = 'OAuth realm="Schoology API", ' + Object.entries(headerParams)
-      .map(([k, v]) => `${k}="${encodeURIComponent(v)}"`)
-      .join(', ');
+    console.log('[OAuth] header:', authHeader);
 
     return authHeader;
   }

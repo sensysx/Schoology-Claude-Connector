@@ -8,4 +8,5 @@ services:
     environment:
       - SCHOOLOGY_CONSUMER_KEY=${SCHOOLOGY_CONSUMER_KEY}
       - SCHOOLOGY_CONSUMER_SECRET=${SCHOOLOGY_CONSUMER_SECRET}
+      - SCHOOLOGY_BASE_URL=${SCHOOLOGY_BASE_URL:-https://api.schoology.com/v1}
       - PORT=${PORT:-3000}

@@ -81,11 +81,12 @@ export class SchoologyClient {
   async getUpcomingAssignments() {
     const all = await this.getAllAssignments();
     const now = Date.now() / 1000;
-    return all.map((course) => ({
-      ...course,
-      assignments: course.assignments
-        .filter(a => a.due && parseInt(a.due) >= now)
-        .sort((a, b) => parseInt(a.due) - parseInt(b.due)),
-    })).filter(c => c.assignments.length > 0);
-  }
+      return all.map((course) => ({
+        ...course,
+        assignments: course.assignments
+          .filter(a => a.due && Date.parse(a.due) / 1000 >= now)
+          .sort((a, b) => Date.parse(a.due) - Date.parse(b.due)),
+  })).filter(c => c.assignments.length > 0);
+}
+
 }

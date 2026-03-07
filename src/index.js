@@ -61,11 +61,21 @@ function createServer() {
   );
 
   server.tool(
-    'get_upcoming_assignments',
-    'Get only upcoming (not yet due) assignments sorted by due date',
+    'get_document',
+    'Get a specific document by ID',
     {},
     async () => {
-      const data = await client.getUpcomingAssignments();
+      const data = await client.getDocument();
+      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+    }
+  );
+
+  server.tool(
+    'get_course_documents',
+    'Get all documents for a specific course section',
+    { section_id: z.string().describe('The section ID from get_courses') },
+    async ({ section_id }) => {
+      const data = await client.getSectionDocuments(section_id);
       return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
     }
   );

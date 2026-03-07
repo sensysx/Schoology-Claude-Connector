@@ -23,18 +23,27 @@ export class SchoologyClient {
   async request(path) {
     const url = `${BASE_URL}${path}`;
 
-    const result = await new Promise((resolve, reject) => {
-      this.oauth.get(url, null, null, (err, data, res) => {
-        console.log(`[request] ${url} → ${res?.statusCode}`);
-        if (err) {
-          console.error('[request] error:', err.statusCode, err.data?.slice(0, 300));
-          return reject(new Error(`Schoology API ${err.statusCode}: ${err.data?.slice(0, 300)}`));
-        }
-        resolve(data);
-      });
+    const params = this.oauth._prepareParameters(null, null, 'GET', url, null);
+    const authHeader = this.oauth._buildAuthorizationHeaders(params);
+
+    const res = await fetch(url, {
+      redirect: 'manual',
+      headers: {
+        Authorization: authHeader,
+        Accept: 'application/json',
+      },
     });
 
-    return JSON.parse(result);
+    console.log(`[request] ${url} → ${res.status}`);
+    console.log('[request] location:', res.headers.get('location'));
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.log('[request] body:', text.slice(0, 500));
+      throw new Error(`Schoology API ${res.status}: ${text.slice(0, 300)}`);
+    }
+
+    return res.json();
   }
 
   async getMe() {

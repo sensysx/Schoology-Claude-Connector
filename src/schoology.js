@@ -20,26 +20,27 @@ export class SchoologyClient {
     );
   }
 
-  async request(path) {
-    const url = `${BASE_URL}${path}`;
-
+  async signedFetch(url) {
     const params = this.oauth._prepareParameters(null, null, 'GET', url, null);
     const authHeader = this.oauth._buildAuthorizationHeaders(params);
-
-    const res = await fetch(url, {
+    return fetch(url, {
       redirect: 'manual',
-      headers: {
-        Authorization: authHeader,
-        Accept: 'application/json',
-      },
+      headers: { Authorization: authHeader, Accept: 'application/json' },
     });
+  }
 
-    console.log(`[request] ${url} → ${res.status}`);
-    console.log('[request] location:', res.headers.get('location'));
+  async request(path) {
+    const url = `${BASE_URL}${path}`;
+    let res = await this.signedFetch(url);
+
+    // Follow redirects with a fresh signed request
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get('location');
+      res = await this.signedFetch(location);
+    }
 
     if (!res.ok) {
       const text = await res.text();
-      console.log('[request] body:', text.slice(0, 500));
       throw new Error(`Schoology API ${res.status}: ${text.slice(0, 300)}`);
     }
 

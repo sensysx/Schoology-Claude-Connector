@@ -8,6 +8,7 @@ import { SchoologyClient } from './schoology.js';
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
+const VERSION = '1.1.3';
 
 const client = new SchoologyClient(
   process.env.SCHOOLOGY_CONSUMER_KEY,
@@ -17,7 +18,7 @@ const client = new SchoologyClient(
 function createServer() {
   const server = new McpServer({
     name: 'schoology-connector',
-    version: '1.0.0',
+    version: VERSION,
   });
 
   server.tool(
@@ -56,16 +57,6 @@ function createServer() {
     {},
     async () => {
       const data = await client.getAllAssignments();
-      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
-    }
-  );
-
-  server.tool(
-    'get_document',
-    'Get a specific document by ID',
-    {},
-    async () => {
-      const data = await client.getDocument();
       return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
     }
   );
@@ -128,5 +119,5 @@ app.get('/debug', async (_req, res) => {
 app.listen(PORT, () => {
   console.log(`Schoology MCP server running on port ${PORT}`);
   console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);
-  console.log('Version: 1.1.2');
+  console.log(`Version: ${VERSION}`);
 });

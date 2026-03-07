@@ -78,15 +78,13 @@ export class SchoologyClient {
     return results;
   }
 
-  async getUpcomingAssignments() {
-    const all = await this.getAllAssignments();
-    const now = Date.now();
-      return all.map((course) => ({
-        ...course,
-        assignments: course.assignments
-          .filter(a => a.due && new Date(a.due.replace(' ', 'T')) >= now)
-          .sort((a, b) => new Date(a.due.replace(' ', 'T')) - new Date(a.due.replace(' ', 'T'))),
-  })).filter(c => c.assignments.length > 0);
-}
+  async getDocument(documentId, sectionId) {
+    const data = await this.request(`/sections/${sectionId}/documents/${documentId}`);
+    return data;
+  }
 
+  async getSectionDocuments(sectionId) {
+    const data = await this.request(`/sections/${sectionId}/documents`);
+    return data.document;
+  }
 }

@@ -59,6 +59,7 @@ export class SchoologyClient {
     });
 
     console.log(`[request] ${url} → ${res.status} ${res.statusText}`);
+    console.log('[request] location:', res.headers.get('location'));
 
     if (!res.ok) {
       const text = await res.text();

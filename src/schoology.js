@@ -51,15 +51,19 @@ export class SchoologyClient {
     const url = `${BASE_URL}${path}`;
 
     const res = await fetch(url, {
+      redirect: 'manual',
       headers: {
         Authorization: this.buildAuthHeader(url),
         Accept: 'application/json',
       },
     });
 
+    console.log(`[request] ${url} → ${res.status} ${res.statusText}`);
+
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(`Schoology API ${res.status}: ${text}`);
+      console.log('[request] response body (first 500):', text.slice(0, 500));
+      throw new Error(`Schoology API ${res.status}: ${text.slice(0, 300)}`);
     }
 
     return res.json();

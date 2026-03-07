@@ -80,12 +80,12 @@ export class SchoologyClient {
 
   async getUpcomingAssignments() {
     const all = await this.getAllAssignments();
-    const now = Date.now() / 1000;
+    const now = Date.now();
       return all.map((course) => ({
         ...course,
         assignments: course.assignments
-          .filter(a => a.due && Date.parse(a.due) / 1000 >= now)
-          .sort((a, b) => Date.parse(a.due) - Date.parse(b.due)),
+          .filter(a => a.due && new Date(a.due.replace(' ', 'T')) >= now)
+          .sort((a, b) => new Date(a.due.replace(' ', 'T')) - new Date(a.due.replace(' ', 'T'))),
   })).filter(c => c.assignments.length > 0);
 }
 

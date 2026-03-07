@@ -128,4 +128,5 @@ app.get('/debug', async (_req, res) => {
 app.listen(PORT, () => {
   console.log(`Schoology MCP server running on port ${PORT}`);
   console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);
+  console.log('Version: 1.1.2');
 });

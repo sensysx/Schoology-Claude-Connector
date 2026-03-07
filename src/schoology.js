@@ -1,5 +1,7 @@
-import crypto from 'crypto';
+import pkg from 'oauth';
 import fetch from 'node-fetch';
+
+const { OAuth } = pkg;
 
 const BASE_URL = process.env.SCHOOLOGY_BASE_URL || 'https://api.schoology.com/v1';
 
@@ -8,66 +10,31 @@ export class SchoologyClient {
     if (!consumerKey || !consumerSecret) {
       throw new Error('SCHOOLOGY_CONSUMER_KEY and SCHOOLOGY_CONSUMER_SECRET must be set in .env');
     }
-    this.consumerKey = consumerKey.trim();
-    this.consumerSecret = consumerSecret.trim();
-  }
-
-  buildAuthHeader(url) {
-    const nonce = crypto.randomBytes(16).toString('hex');
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-
-    const params = {
-      oauth_consumer_key: this.consumerKey,
-      oauth_nonce: nonce,
-      oauth_signature_method: 'HMAC-SHA1',
-      oauth_timestamp: timestamp,
-      oauth_version: '1.0',
-    };
-
-    const paramString = Object.keys(params)
-      .sort()
-      .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
-      .join('&');
-
-    const baseString = `GET&${encodeURIComponent(url)}&${encodeURIComponent(paramString)}`;
-    const signingKey = `${encodeURIComponent(this.consumerSecret)}&`;
-    const signature = crypto.createHmac('sha1', signingKey).update(baseString).digest('base64');
-
-    const headerParams = { ...params, oauth_signature: signature };
-    const authHeader = 'OAuth ' + Object.entries(headerParams)
-      .map(([k, v]) => `${k}="${v}"`)
-      .join(', ');
-
-    console.log('[OAuth] url:', url);
-    console.log('[OAuth] timestamp:', timestamp);
-    console.log('[OAuth] nonce:', nonce);
-    console.log('[OAuth] signature:', signature);
-    console.log('[OAuth] header:', authHeader);
-
-    return authHeader;
+    this.oauth = new OAuth(
+      null, null,
+      consumerKey.trim(),
+      consumerSecret.trim(),
+      '1.0',
+      null,
+      'HMAC-SHA1'
+    );
   }
 
   async request(path) {
     const url = `${BASE_URL}${path}`;
 
-    const res = await fetch(url, {
-      redirect: 'manual',
-      headers: {
-        Authorization: this.buildAuthHeader(url),
-        Accept: 'application/json',
-      },
+    const result = await new Promise((resolve, reject) => {
+      this.oauth.get(url, null, null, (err, data, res) => {
+        console.log(`[request] ${url} → ${res?.statusCode}`);
+        if (err) {
+          console.error('[request] error:', err.statusCode, err.data?.slice(0, 300));
+          return reject(new Error(`Schoology API ${err.statusCode}: ${err.data?.slice(0, 300)}`));
+        }
+        resolve(data);
+      });
     });
 
-    console.log(`[request] ${url} → ${res.status} ${res.statusText}`);
-    console.log('[request] location:', res.headers.get('location'));
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.log('[request] response body (first 500):', text.slice(0, 500));
-      throw new Error(`Schoology API ${res.status}: ${text.slice(0, 300)}`);
-    }
-
-    return res.json();
+    return JSON.parse(result);
   }
 
   async getMe() {

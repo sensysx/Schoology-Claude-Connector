@@ -15,7 +15,7 @@ const client = new SchoologyClient(
   process.env.SCHOOLOGY_CONSUMER_SECRET
 );
 
-console.log('Creating server');
+
 function createServer() {
   const server = new McpServer({
     name: 'schoology-connector',
@@ -74,10 +74,10 @@ function createServer() {
       return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
     }
   );
-
+  console.log('Registered');
   return server;
 }
-console.log('Registered');
+
 const app = express();
 app.use(express.json());
 

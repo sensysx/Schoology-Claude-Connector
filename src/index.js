@@ -83,6 +83,25 @@ app.use((req, _res, next) => {
   next();
 });
 
+// OAuth discovery stubs — tell Claude.ai this server requires no auth
+app.get('/.well-known/oauth-protected-resource/mcp', (req, res) => {
+  const base = `${req.protocol}://${req.get('host')}`;
+  res.json({ resource: `${base}/mcp` });
+});
+
+app.get('/.well-known/oauth-protected-resource', (req, res) => {
+  const base = `${req.protocol}://${req.get('host')}`;
+  res.json({ resource: `${base}/mcp` });
+});
+
+app.get('/.well-known/oauth-authorization-server', (_req, res) => {
+  res.status(404).end();
+});
+
+app.post('/register', (_req, res) => {
+  res.status(400).end();
+});
+
 app.post('/mcp', async (req, res) => {
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
   const server = createServer();

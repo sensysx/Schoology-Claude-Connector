@@ -87,20 +87,57 @@ app.use((req, _res, next) => {
   next();
 });
 
-// OAuth discovery stubs — empty authorization_servers tells Claude.ai no OAuth needed
+// OAuth 2.1 + PKCE flow — auto-approves so Claude.ai completes auth without user login
+
 app.get('/.well-known/oauth-protected-resource', (req, res) => {
   const base = `${req.protocol}://${req.get('host')}`;
-  res.json({ resource: base, authorization_servers: [] });
+  res.json({ resource: base, authorization_servers: [base] });
 });
+
 app.get('/.well-known/oauth-protected-resource/mcp', (req, res) => {
   const base = `${req.protocol}://${req.get('host')}`;
-  res.json({ resource: base, authorization_servers: [] });
+  res.json({ resource: base, authorization_servers: [base] });
 });
-app.get('/.well-known/oauth-authorization-server', (_req, res) => {
-  res.status(404).json({ error: 'No authorization server' });
+
+app.get('/.well-known/oauth-authorization-server', (req, res) => {
+  const base = `${req.protocol}://${req.get('host')}`;
+  res.json({
+    issuer: base,
+    authorization_endpoint: `${base}/authorize`,
+    token_endpoint: `${base}/token`,
+    registration_endpoint: `${base}/register`,
+    response_types_supported: ['code'],
+    grant_types_supported: ['authorization_code'],
+    code_challenge_methods_supported: ['S256'],
+  });
 });
+
+// Auto-approve: immediately redirect back with a dummy auth code
+app.get('/authorize', (req, res) => {
+  const { redirect_uri, state } = req.query;
+  if (!redirect_uri) return res.status(400).send('Missing redirect_uri');
+  const code = 'schoology-auth-code';
+  const url = new URL(redirect_uri);
+  url.searchParams.set('code', code);
+  if (state) url.searchParams.set('state', state);
+  res.redirect(url.toString());
+});
+
 app.post('/register', (_req, res) => {
-  res.status(400).json({ error: 'Registration not supported' });
+  res.json({
+    client_id: 'schoology-mcp-client',
+    grant_types: ['authorization_code'],
+    redirect_uris: ['https://claude.ai/api/mcp/auth_callback'],
+    token_endpoint_auth_method: 'none',
+  });
+});
+
+app.post('/token', (_req, res) => {
+  res.json({
+    access_token: 'schoology-access-token',
+    token_type: 'bearer',
+    expires_in: 86400,
+  });
 });
 
 app.post('/mcp', async (req, res) => {

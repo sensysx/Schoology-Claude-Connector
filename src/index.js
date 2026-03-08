@@ -180,6 +180,11 @@ app.get('/debug', async (_req, res) => {
   }
 });
 
+app.get('/tools-debug', (req, res) => {
+  const server = createServer();
+  res.json({ tools: Object.keys(server._registeredTools) });
+});
+
 app.listen(PORT, () => {
   console.log(`Schoology MCP server running on port ${PORT}`);
   console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);

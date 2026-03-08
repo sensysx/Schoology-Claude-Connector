@@ -74,6 +74,13 @@ function createServer() {
       return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
     }
   );
+  
+  server.tool(
+  'get_test',
+  'Test tool',
+  {},
+  async () => ({ content: [{ type: 'text', text: 'test' }] })
+);
   console.log('Registered');
   return server;
 }

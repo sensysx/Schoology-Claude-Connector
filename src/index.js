@@ -83,14 +83,14 @@ app.use((req, _res, next) => {
   next();
 });
 
-// OAuth discovery stubs — tell Claude.ai this server has no auth server
+// OAuth discovery stubs — empty authorization_servers tells Claude.ai no OAuth needed
 app.get('/.well-known/oauth-protected-resource', (req, res) => {
   const base = `${req.protocol}://${req.get('host')}`;
-  res.json({ resource: base });
+  res.json({ resource: base, authorization_servers: [] });
 });
 app.get('/.well-known/oauth-protected-resource/mcp', (req, res) => {
   const base = `${req.protocol}://${req.get('host')}`;
-  res.json({ resource: base });
+  res.json({ resource: base, authorization_servers: [] });
 });
 app.get('/.well-known/oauth-authorization-server', (_req, res) => {
   res.status(404).json({ error: 'No authorization server' });

@@ -8,7 +8,7 @@ import { SchoologyClient } from './schoology.js';
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-const VERSION = '1.1.5';
+const VERSION = '1.1.6';
 
 const client = new SchoologyClient(
   process.env.SCHOOLOGY_CONSUMER_KEY,
@@ -83,11 +83,21 @@ app.use((req, _res, next) => {
   next();
 });
 
-// OAuth discovery stubs — return 404 to tell Claude.ai no auth is required
-app.get('/.well-known/oauth-protected-resource/mcp', (_req, res) => res.status(404).end());
-app.get('/.well-known/oauth-protected-resource', (_req, res) => res.status(404).end());
-app.get('/.well-known/oauth-authorization-server', (_req, res) => res.status(404).end());
-app.post('/register', (_req, res) => res.status(400).end());
+// OAuth discovery stubs — tell Claude.ai this server has no auth server
+app.get('/.well-known/oauth-protected-resource', (req, res) => {
+  const base = `${req.protocol}://${req.get('host')}`;
+  res.json({ resource: base });
+});
+app.get('/.well-known/oauth-protected-resource/mcp', (req, res) => {
+  const base = `${req.protocol}://${req.get('host')}`;
+  res.json({ resource: base });
+});
+app.get('/.well-known/oauth-authorization-server', (_req, res) => {
+  res.status(404).json({ error: 'No authorization server' });
+});
+app.post('/register', (_req, res) => {
+  res.status(400).json({ error: 'Registration not supported' });
+});
 
 app.post('/mcp', async (req, res) => {
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });

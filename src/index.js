@@ -66,7 +66,7 @@ function createServer() {
 
   console.log('Registering');
   server.tool(
-    'get_course_documents',
+    'get_section_docs',
     'Get all documents for a specific course section',
     { section_id: z.string().describe('The section ID from get_courses') },
     async ({ section_id }) => {

@@ -85,6 +85,6 @@ export class SchoologyClient {
 
   async getSectionDocuments(sectionId) {
     const data = await this.request(`/sections/${sectionId}/documents`);
-    return data.document;
+    return data.document || [];
   }
 }

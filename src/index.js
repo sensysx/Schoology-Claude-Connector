@@ -8,19 +8,21 @@ import { SchoologyClient } from './schoology.js';
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-const VERSION = '1.1.7';
+const VERSION = '1.1.8d1';
 
 const client = new SchoologyClient(
   process.env.SCHOOLOGY_CONSUMER_KEY,
   process.env.SCHOOLOGY_CONSUMER_SECRET
 );
 
+console.log('Creating server');
 function createServer() {
   const server = new McpServer({
     name: 'schoology-connector',
     version: VERSION,
   });
 
+  console.log('Created server');
   server.tool(
     'get_profile',
     'Get your Schoology user profile',
@@ -30,6 +32,7 @@ function createServer() {
       return { content: [{ type: 'text', text: JSON.stringify(me, null, 2) }] };
     }
   );
+
 
   server.tool(
     'get_courses',
@@ -61,6 +64,7 @@ function createServer() {
     }
   );
 
+  console.log('Registering');
   server.tool(
     'get_course_documents',
     'Get all documents for a specific course section',

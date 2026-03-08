@@ -8,7 +8,7 @@ import { SchoologyClient } from './schoology.js';
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-const VERSION = '1.1.8d1';
+const VERSION = '1.1.8d2';
 
 const client = new SchoologyClient(
   process.env.SCHOOLOGY_CONSUMER_KEY,
@@ -77,7 +77,7 @@ function createServer() {
 
   return server;
 }
-
+console.log('Registered');
 const app = express();
 app.use(express.json());
 

@@ -74,7 +74,7 @@ function createServer() {
       return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
     }
   );
-  
+
   server.tool(
   'get_test',
   'Test tool',
@@ -141,9 +141,9 @@ app.post('/register', (_req, res) => {
 
 app.post('/token', (_req, res) => {
   res.json({
-    access_token: 'schoology-access-token',
+    access_token: `schoology-token-${Date.now()}`,
     token_type: 'bearer',
-    expires_in: 86400,
+    expires_in: 300,
   });
 });
 

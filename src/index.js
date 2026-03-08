@@ -8,7 +8,7 @@ import { SchoologyClient } from './schoology.js';
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-const VERSION = '1.1.3';
+const VERSION = '1.1.4';
 
 const client = new SchoologyClient(
   process.env.SCHOOLOGY_CONSUMER_KEY,

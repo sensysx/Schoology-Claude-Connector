@@ -8,7 +8,7 @@ import { SchoologyClient } from './schoology.js';
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
-const VERSION = '1.1.6';
+const VERSION = '1.1.7';
 
 const client = new SchoologyClient(
   process.env.SCHOOLOGY_CONSUMER_KEY,
@@ -126,7 +126,7 @@ app.get('/health', (_req, res) => {
 app.get('/debug', async (_req, res) => {
   try {
     const me = await client.getMe();
-    res.json({ status: 'ok', user: me });
+    res.json({ status: 'ok', user: me , version: VERSION});
   } catch (e) {
     res.status(500).json({ status: 'error', message: e.message });
   }

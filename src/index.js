@@ -71,9 +71,21 @@ function createServer() {
     }
   );
 
-  console.log('Registering');
   server.tool(
-    'fetch_docs',
+    'get_document',
+    'Get a specific document by ID and section',
+    {
+      document_id: z.string().describe('The document ID from get_section_documents'),
+      section_id: z.string().describe('The section ID from get_courses'),
+    },
+    async ({ document_id, section_id }) => {
+      const data = await client.getDocument(document_id, section_id);
+      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
+    }
+  );
+  
+  server.tool(
+    'get_course_documents',
     'Get all documents for a specific course section',
     { section_id: z.string().describe('The section ID from get_courses') },
     async ({ section_id }) => {
